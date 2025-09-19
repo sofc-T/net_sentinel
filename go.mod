@@ -4,7 +4,7 @@ go 1.23.4
 
 require (
 	github.com/IBM/sarama v1.45.1
-	github.com/Ullaakut/nmap v2.0.2+incompatible
+	github.com/Ullaakut/nmap/v2 v2.0.2
 	github.com/digineo/go-ping v1.1.0
 	github.com/google/gopacket v1.1.19
 	github.com/gosnmp/gosnmp v1.39.0

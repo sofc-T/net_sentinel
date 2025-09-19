@@ -10,7 +10,7 @@ import (
 	"net"
 	"time"
 
-	"github.com/Ullaakut/nmap"
+	"github.com/Ullaakut/nmap/v2"
 	"github.com/google/gopacket"
 	"github.com/google/gopacket/pcap"
 	"github.com/mdlayher/arp"
