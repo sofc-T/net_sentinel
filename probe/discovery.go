@@ -36,34 +36,34 @@ func CaptureLLDP(interfaceName string, captureTimeout time.Duration) ([]models.D
 
 	timeout := time.After(captureTimeout)
 
-LOOP:
-	for {
-		select {
-		case packet, ok := <-packets:
-			if !ok {
-				log.Println("[LLDP] Packet channel closed.")
+	LOOP:
+		for {
+			select {
+			case packet, ok := <-packets:
+				if !ok {
+					log.Println("[LLDP] Packet channel closed.")
+					break LOOP
+				}
+				if packet == nil {
+					continue
+				}
+
+				fmt.Println("[LLDP] Captured packet:", packet)
+
+				config := models.DeviceConfig{
+					Hostname: "lldp-device", // TODO: Parse real hostname from packet
+					DeviceType: "switch",
+					Status: "active",
+					MonitoringProtocols: []string{"LLDP"},
+				}
+				device := models.NewDevice(config)
+				devices = append(devices, *device)
+
+			case <-timeout:
+				fmt.Println("[LLDP] Timeout reached, finishing capture.")
 				break LOOP
 			}
-			if packet == nil {
-				continue
-			}
-
-			fmt.Println("[LLDP] Captured packet:", packet)
-
-			config := models.DeviceConfig{
-				Hostname: "lldp-device", // TODO: Parse real hostname from packet
-				DeviceType: "switch",
-				Status: "active",
-				MonitoringProtocols: []string{"LLDP"},
-			}
-			device := models.NewDevice(config)
-			devices = append(devices, *device)
-
-		case <-timeout:
-			fmt.Println("[LLDP] Timeout reached, finishing capture.")
-			break LOOP
 		}
-	}
 
 	log.Printf("[LLDP] Capture finished. Found %d device(s).\n", len(devices))
 	return devices, nil
