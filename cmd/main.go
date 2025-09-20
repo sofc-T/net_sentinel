@@ -21,7 +21,7 @@ func main() {
 	done := make(chan struct{})
 	go func() {
 		var err error
-		lldpDevices, err = probe.CaptureLLDP(interfaceName, 5 *  time.Second)
+		lldpDevices, err = probe.CaptureLLDP(interfaceName, 5*time.Second)
 		if err != nil {
 			log.Println("LLDP/CDP Capture Error:", err)
 		}
@@ -50,5 +50,23 @@ func main() {
 	log.Println("Discovered Devices:")
 	for _, dev := range allDevices {
 		log.Printf("- IP: %s, Status: %s, Protocols: %v\n", dev.GetIPAddress(), dev.GetStatus(), dev.GetMonitoringProtocols())
+	}
+
+	var devicesToPing []map[string]string
+	for _, dev := range allDevices {
+		if dev.GetIPAddress() != "" {
+			devicesToPing = append(devicesToPing, map[string]string{
+				"id": dev.GetID(),
+				"ip": dev.GetIPAddress(),
+			})
+		}
+	}
+
+	pingResults := probe.PingNetwork(devicesToPing, 2*time.Second)
+
+	log.Println("Ping Results:")
+	for _, r := range pingResults {
+		log.Printf("Device %s (%s) - Success: %v, Latency: %dms",
+			r.GetDeviceID(), r.GetIPAddress(), r.GetSuccess(), r.GetLatencyMs())
 	}
 }
