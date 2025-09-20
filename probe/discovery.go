@@ -9,6 +9,10 @@ import (
 	// "log"
 	"net"
 	"time"
+	"os/exec"
+	"bytes"
+	"regexp"
+	"strings"
 
 	"github.com/Ullaakut/nmap/v2"
 	"github.com/google/gopacket"
@@ -267,4 +271,46 @@ func maskToPrefix(mask net.IPMask) int {
     return ones
 }
 
+
+func NmapFingerprint(ip string) (string, string) {
+	cmd := exec.Command("nmap", "-sV", "-T4", "--open", ip)
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+
+	if err := cmd.Run(); err != nil {
+		// If nmap fails or is not installed, return empty values
+		return "", ""
+	}
+
+	output := out.String()
+
+	// Extract open ports and services using regex
+	re := regexp.MustCompile(`(?m)^(\d+)/tcp\s+open\s+([\w\-\?\!]+)(?:\s+(.*))?$`)
+	matches := re.FindAllStringSubmatch(output, -1)
+
+	if len(matches) == 0 {
+		return "", ""
+	}
+
+	var protocols []string
+	var descParts []string
+
+	for _, m := range matches {
+		port := m[1]
+		service := m[2]
+		info := strings.TrimSpace(m[3])
+		if info != "" {
+			descParts = append(descParts, port+"/"+service+"("+info+")")
+		} else {
+			descParts = append(descParts, port+"/"+service)
+		}
+		protocols = append(protocols, service)
+	}
+
+	description := strings.Join(descParts, "; ")
+	protoList := strings.Join(protocols, ",")
+
+	return description, protoList
+}
 

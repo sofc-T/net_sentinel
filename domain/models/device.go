@@ -9,7 +9,8 @@ type Device struct {
 	vendor             string     
 	status             string     
 	monitoringProtocols []string  
-	interfaces         []Interface 
+	interfaces         []Interface
+	macAddress        string 
 }
 
 
@@ -22,6 +23,7 @@ type DeviceConfig struct {
 	Status             string
 	MonitoringProtocols []string
 	Interfaces         []Interface
+	MACAddress        string
 }
 
 // NewDeviceConfig creates a new DeviceConfig instance
@@ -34,6 +36,7 @@ func NewDevice(device DeviceConfig) *Device {
 		status:             device.Status,
 		monitoringProtocols: device.MonitoringProtocols,
 		interfaces:         device.Interfaces,
+		macAddress:        device.MACAddress,
 	}
 }
 
@@ -116,4 +119,8 @@ func (d *Device) SetInterfaces(interfaces []Interface) {
 // GetInterfaces gets the interfaces of the device
 func (d *Device) GetInterfaces() []Interface {
 	return d.interfaces
+}
+
+func (d *Device) GetMACAddress() string {
+	return d.macAddress
 }
