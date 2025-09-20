@@ -105,4 +105,28 @@ func main() {
 			log.Printf("SNMP Metrics for %s: %+v", dev.GetIPAddress(), metrics.Metrics.Values)
 		}
 	}
+
+	// 😉 default username and password
+	// for _, dev := range allDevices {
+	// 	if dev.GetIPAddress() != "" {
+	// 		sshConfig := probe.SSHConfig{
+	// 			Host:     dev.GetIPAddress(),
+	// 			Port:     "22",
+	// 			Username: "admin",
+	// 			Password: "password",
+	// 			Timeout:  3 * time.Second,
+	// 		}
+	// 		output, err := probe.RunSSHCommand(sshConfig, "show interfaces")
+	// 		if err == nil {
+	// 			log.Printf("SSH Output for %s:\n%s", dev.GetIPAddress(), output)
+	// 		}
+
+	// 		// Example Telnet
+	// 		output, err = probe.RunTelnetCommand(dev.GetIPAddress()+":23", "show ip route")
+	// 		if err == nil {
+	// 			log.Printf("Telnet Output for %s:\n%s", dev.GetIPAddress(), output)
+	// 		}
+	// 	}
+	// }
+
 }
