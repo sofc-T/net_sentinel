@@ -21,7 +21,7 @@ func main() {
 	done := make(chan struct{})
 	go func() {
 		var err error
-		lldpDevices, err = probe.CaptureLLDP(interfaceName, 5*time.Second)
+		lldpDevices, err = probe.CaptureLLDP(interfaceName, 5 *  time.Second)
 		if err != nil {
 			log.Println("LLDP/CDP Capture Error:", err)
 		}
@@ -52,6 +52,7 @@ func main() {
 		log.Printf("- IP: %s, Status: %s, Protocols: %v\n", dev.GetIPAddress(), dev.GetStatus(), dev.GetMonitoringProtocols())
 	}
 
+	// ping for reachability and latency
 	var devicesToPing []map[string]string
 	for _, dev := range allDevices {
 		if dev.GetIPAddress() != "" {
