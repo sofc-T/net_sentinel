@@ -25,7 +25,7 @@ import (
 func CaptureLLDP(interfaceName string, captureTimeout time.Duration) ([]models.Device, error) {
 	var devices []models.Device
 
-	handle, err := pcap.OpenLive(interfaceName, 1600, true, 10*time.Second)
+	handle, err := pcap.OpenLive(interfaceName, 1600, true, 100*time.Second)
 	if err != nil {
 		return nil, fmt.Errorf("error opening interface %s: %v", interfaceName, err)
 	}
@@ -76,7 +76,7 @@ func CaptureLLDP(interfaceName string, captureTimeout time.Duration) ([]models.D
 
 
 func ScanIPRange(subnet string) ([]models.Device, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1000*time.Second)
 	defer cancel()
 
 	scanner, err := nmap.NewScanner(
@@ -99,7 +99,7 @@ func ScanIPRange(subnet string) ([]models.Device, error) {
 			config := models.DeviceConfig{
 				Hostname: "", // Nmap Ping scan may not give hostname directly
 				IPAddress: host.Addresses[0].String(),
-				DeviceType: "unknown", // Can improve if you run deeper scan later
+				DeviceType: "unknown", // deeper scan later
 				Vendor: "",
 				Status: "active",
 				MonitoringProtocols: []string{"Nmap"},

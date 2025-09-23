@@ -40,7 +40,7 @@ func main() {
 	done := make(chan struct{})
 	go func() {
 		var err error
-		lldpDevices, err = probe.CaptureLLDP(interfaceName, 50*time.Second)
+		lldpDevices, err = probe.CaptureLLDP(interfaceName, 500*time.Second)
 		if err != nil {
 			log.Println("LLDP/CDP Capture Error:", err)
 		}
@@ -119,7 +119,7 @@ func main() {
 		}
 	}
 
-	pingResults := probe.PingNetwork(devicesToPing, 20*time.Second)
+	pingResults := probe.PingNetwork(devicesToPing, 500*time.Second)
 	log.Println("Ping Results:")
 	for _, r := range pingResults {
 		log.Printf("Device %s (%s) - Success: %v, Latency: %dms", r.GetDeviceID(), r.GetIPAddress(), r.GetSuccess(), r.GetLatencyMs())
@@ -140,7 +140,7 @@ func main() {
 				allDevices[i].Vendor = lookupVendorFromMAC(dev.MAC)
 			}
 
-			// Optional Nmap fingerprinting (if implemented in probe)
+			// Optional Nmap fingerprinting
 			if descr, protos := probe.NmapFingerprint(dev.IP); descr != "" {
 				allDevices[i].Descr = descr
 				if allDevices[i].Protocols != "" {
