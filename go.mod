@@ -8,6 +8,7 @@ require (
 	github.com/digineo/go-ping v1.1.0
 	github.com/google/gopacket v1.1.19
 	github.com/gosnmp/gosnmp v1.39.0
+	github.com/grandcat/zeroconf v1.0.0
 	github.com/jedib0t/go-pretty/v6 v6.6.8
 	github.com/mdlayher/arp v0.0.0-20220512170110-6706a2966875
 	github.com/reiver/go-telnet v0.0.0-20180421082511-9ff0b2ab096e
@@ -15,6 +16,7 @@ require (
 )
 
 require (
+	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/digineo/go-logwrap v0.0.0-20181106161722-a178c58ea3f0 // indirect
 	github.com/eapache/go-resiliency v1.7.0 // indirect
@@ -35,6 +37,7 @@ require (
 	github.com/mdlayher/ethernet v0.0.0-20220221185849-529eae5b6118 // indirect
 	github.com/mdlayher/packet v1.0.0 // indirect
 	github.com/mdlayher/socket v0.2.1 // indirect
+	github.com/miekg/dns v1.1.27 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/reiver/go-oi v1.0.0 // indirect

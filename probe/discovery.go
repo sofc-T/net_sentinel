@@ -273,44 +273,81 @@ func maskToPrefix(mask net.IPMask) int {
 
 
 func NmapFingerprint(ip string) (string, string) {
-	cmd := exec.Command("nmap", "-sV", "-T4", "--open", ip)
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &out
+    // Use -Pn to skip host discovery (faster if ICMP is blocked),
+    // -sS for a quick SYN scan, -T4 for speed, and --open to ignore closed ports.
+    cmd := exec.Command("nmap", "-Pn", "-sS", "-sV", "-T4", "--open", "--max-retries", "2", "--host-timeout", "10s", ip)
+    var out bytes.Buffer
+    cmd.Stdout = &out
+    cmd.Stderr = &out
 
-	if err := cmd.Run(); err != nil {
-		// If nmap fails or is not installed, return empty values
-		return "", ""
-	}
+    if err := cmd.Run(); err != nil {
+        log.Printf("[NmapFingerprint] Error running nmap on %s: %v", ip, err)
+        return "", ""
+    }
 
-	output := out.String()
+    output := out.String()
 
-	// Extract open ports and services using regex
-	re := regexp.MustCompile(`(?m)^(\d+)/tcp\s+open\s+([\w\-\?\!]+)(?:\s+(.*))?$`)
-	matches := re.FindAllStringSubmatch(output, -1)
+    // Match open TCP ports with service and version info
+    re := regexp.MustCompile(`(?m)^(\d+)/tcp\s+open\s+([\w\-]+)(?:\s+(.*))?$`)
+    matches := re.FindAllStringSubmatch(output, -1)
 
-	if len(matches) == 0 {
-		return "", ""
-	}
+    if len(matches) == 0 {
+        return "", ""
+    }
 
-	var protocols []string
-	var descParts []string
+    var protocols []string
+    var descParts []string
+    for _, m := range matches {
+        port := m[1]
+        service := m[2]
+        info := strings.TrimSpace(m[3])
+        if info != "" {
+            descParts = append(descParts, fmt.Sprintf("%s/%s(%s)", port, service, info))
+        } else {
+            descParts = append(descParts, fmt.Sprintf("%s/%s", port, service))
+        }
+        protocols = append(protocols, service)
+    }
 
-	for _, m := range matches {
-		port := m[1]
-		service := m[2]
-		info := strings.TrimSpace(m[3])
-		if info != "" {
-			descParts = append(descParts, port+"/"+service+"("+info+")")
-		} else {
-			descParts = append(descParts, port+"/"+service)
-		}
-		protocols = append(protocols, service)
-	}
-
-	description := strings.Join(descParts, "; ")
-	protoList := strings.Join(protocols, ",")
-
-	return description, protoList
+    return strings.Join(descParts, "; "), strings.Join(protocols, ",")
 }
+
+
+func LookupVendor(mac string) string {
+    if mac == "" {
+        return ""
+    }
+    parts := strings.Split(mac, ":")
+    if len(parts) >= 2 {
+        return "Vendor-" + strings.ToUpper(parts[0]+parts[1])
+    }
+    return "UnknownVendor"
+}
+
+
+func PassiveCapture(interfaceName string, duration time.Duration) []string {
+    var discovered []string
+    handle, err := pcap.OpenLive(interfaceName, 65535, true, pcap.BlockForever)
+    if err != nil {
+        log.Printf("[PassiveCapture] Error: %v", err)
+        return discovered
+    }
+    defer handle.Close()
+
+    packetSource := gopacket.NewPacketSource(handle, handle.LinkType())
+    timeout := time.After(duration)
+
+    for {
+        select {
+        case packet := <-packetSource.Packets():
+            if netLayer := packet.NetworkLayer(); netLayer != nil {
+                src, dst := netLayer.NetworkFlow().Endpoints()
+                discovered = append(discovered, fmt.Sprintf("%s -> %s", src, dst))
+            }
+        case <-timeout:
+            return discovered
+        }
+    }
+}
+
 
